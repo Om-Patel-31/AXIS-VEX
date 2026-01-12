@@ -1,0 +1,44 @@
+{
+  "name": "vex-competition-starter",
+  "displayName": "VEX Competition Starter",
+  "description": "Create a new VEX V5 competition project from the AXIS starter template.",
+  "version": "0.1.0",
+  "publisher": "your-publisher-id",
+  "engines": {
+    "vscode": "^1.92.0"
+  },
+  "categories": [
+    "Other"
+  ],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "axis.createVexCompetitionProject",
+        "title": "VEX: Create Competition Project",
+        "category": "VEX"
+      }
+    ]
+  },
+  "scripts": {
+    "vscode:prepublish": "npm run compile",
+    "compile": "tsc -p ./",
+    "watch": "tsc -watch -p ./",
+    "package": "vsce package",
+    "lint": "echo \"No lint configured\"",
+    "test": "node ./out/test/runTest.js"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.30",
+    "@types/vscode": "^1.92.0",
+    "@vscode/test-electron": "^2.3.8",
+    "typescript": "^5.4.2",
+    "vsce": "^2.23.0"
+  },
+  "files": [
+    "out/**/*",
+    "templates/**/*",
+    "README.md"
+  ],
+  "license": "UNLICENSED"
+}
