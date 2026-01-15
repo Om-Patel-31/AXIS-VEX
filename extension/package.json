@@ -3,7 +3,7 @@
   "displayName": "VEX Competition Starter",
   "description": "Create a new VEX V5 competition project from the AXIS starter template.",
   "version": "0.1.0",
-  "publisher": "your-publisher-id",
+  "publisher": "OmPatel",
   "engines": {
     "vscode": "^1.92.0"
   },
@@ -11,14 +11,83 @@
     "Other"
   ],
   "main": "./out/extension.js",
+  "activationEvents": [
+    "onView:vexProjects"
+  ],
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "vex-sidebar",
+          "title": "VEX",
+          "icon": "$(circuit-board)"
+        }
+      ]
+    },
+    "views": {
+      "vex-sidebar": [
+        {
+          "id": "vexProjects",
+          "name": "Projects"
+        },
+        {
+          "id": "vexDevices",
+          "name": "Devices"
+        }
+      ]
+    },
     "commands": [
       {
         "command": "axis.createVexCompetitionProject",
-        "title": "VEX: Create Competition Project",
-        "category": "VEX"
+        "title": "Create New Project",
+        "category": "VEX",
+        "icon": "$(add)"
+      },
+      {
+        "command": "axis.openProject",
+        "title": "Open Project",
+        "category": "VEX",
+        "icon": "$(folder-opened)"
+      },
+      {
+        "command": "axis.refreshProjects",
+        "title": "Refresh Projects",
+        "category": "VEX",
+        "icon": "$(refresh)"
+      },
+      {
+        "command": "axis.buildProject",
+        "title": "Build Project",
+        "category": "VEX",
+        "icon": "$(tools)"
       }
-    ]
+    ],
+    "menus": {
+      "view/title": [
+        {
+          "command": "axis.createVexCompetitionProject",
+          "when": "view == vexProjects",
+          "group": "navigation"
+        },
+        {
+          "command": "axis.refreshProjects",
+          "when": "view == vexProjects",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "axis.openProject",
+          "when": "view == vexProjects && viewItem == vexProject",
+          "group": "inline"
+        },
+        {
+          "command": "axis.buildProject",
+          "when": "view == vexProjects && viewItem == vexProject",
+          "group": "inline"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",
@@ -33,12 +102,13 @@
     "@types/vscode": "^1.92.0",
     "@vscode/test-electron": "^2.3.8",
     "typescript": "^5.4.2",
-    "vsce": "^2.23.0"
+    "vsce": "^2.15.0"
   },
   "files": [
     "out/**/*",
     "templates/**/*",
     "README.md"
   ],
-  "license": "UNLICENSED"
+  "license": "UNLICENSED",
+  "icon": "icon.png"
 }

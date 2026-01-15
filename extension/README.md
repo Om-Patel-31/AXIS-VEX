@@ -1,22 +1,27 @@
 # VEX Competition Starter
 
-Create a ready-to-build VEX V5 competition project from the AXIS starter template with a single command.
+Create and manage VEX V5 competition projects from the AXIS starter template with a graphical interface.
 
-## What this extension does
-- Adds the command **VEX: Create Competition Project** that scaffolds a new project from the bundled template.
-- Copies source, headers, VS Code settings, Makefile, and VEX build scripts (excludes compiled `build` artifacts).
-- Stamps the new project name and creation date into `.vscode/vex_project_settings.json`.
+## Features
+- **VEX Sidebar** with Projects and Devices panels
+- **Create new projects** from AXIS template with one click
+- **Open and build** projects directly from the sidebar
+- **Project detection** - automatically shows VEX projects in your workspace
+- **Build integration** - compile projects with the built-in make command
 
-## Getting started (development)
-1. Install dependencies: `npm install` (run from the `extension` folder).
-2. Build once: `npm run compile`, or keep `npm run watch` running.
-3. Press **F5** to launch an Extension Development Host.
-4. In the new window, open the Command Palette and run **VEX: Create Competition Project**.
-5. Choose a destination folder and project name. The extension creates the project and offers to open it.
+## Usage
+1. Click the VEX icon in the Activity Bar (left sidebar)
+2. Click the **+** button to create a new project
+3. Enter project name and select destination folder
+4. Open projects by clicking the folder icon
+5. Build projects by clicking the tools icon
 
-## Template contents
-- `src/`, `include/`, `makefile`, `vex/`, `.vscode/`, `index.html`, and field images used by the web UI.
-- Excludes generated build outputs (`build/`, `.bin`, `.elf`, `.map`, `.o`).
+## Template Contents
+- Competition-ready source code with PID, odometry, and driver control
+- Pre-configured VS Code settings and IntelliSense
+- VEX V5 makefile and build scripts
+- Field images for autonomous planning
 
-## Packaging
-- Build and package a VSIX: `npm run package` (requires `vsce`, already in devDependencies).
+## Requirements
+- VEX V5 toolchain for building projects
+- Make (for compiling)
