@@ -1,3 +1,12 @@
+/*----------------------------------------------------------------------------*/
+/*                                                                            */
+/*    Module:       main.cpp                                                  */
+/*    Author:       om31d                                                     */
+/*    Created:      1/12/2026, 1:20:40 PM                                     */
+/*    Description:  V5 project                                                */
+/*                                                                            */
+/*----------------------------------------------------------------------------*/
+
 #include "vex.h"
 #include "DriverControl.h"
 #include "OdometryTracker.h"
