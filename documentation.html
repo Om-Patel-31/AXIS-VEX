@@ -1,0 +1,1585 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AXIS // Neural Robotics Interface</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #ffffff;
+            --secondary-color: #ffffff; /* enforce white-only text */
+            --accent-color: #3a3a3a;    /* gray accents only */
+            --bg-dark: #1a1a1a;        /* dark gray background */
+            --bg-card: #242424;        /* medium-dark gray surfaces */
+            --text-primary: #ffffff;   /* white text */
+            --text-secondary: #ffffff; /* white text everywhere */
+            --border-color: #3a3a3a;   /* gray borders */
+            --primary-glow: #ffffff;   /* inline references to glow -> white */
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        html {
+            scroll-behavior: smooth;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            line-height: 1.7;
+            color: var(--text-primary);
+            background: #0f1115 !important;
+            background-image: none !important;
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+        
+        body::before {
+            display: none;
+        }
+        
+        @keyframes bgPulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.7; }
+        }
+        
+        .grid-overlay {
+            display: none;
+        }
+        
+        @keyframes gridMove {
+            0% { transform: translateY(0); }
+            100% { transform: translateY(50px); }
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            text-align: center;
+            padding: 80px 20px 60px;
+            position: relative;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        header::before {
+            display: none;
+        }
+        
+        header h1 {
+            font-family: 'Inter', sans-serif;
+            font-size: 4em;
+            font-weight: 700;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+            letter-spacing: -2px;
+        }
+        
+        @keyframes gradientShift {
+            0%, 100% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+        }
+        
+        header p {
+            font-size: 1.2em;
+            font-weight: 400;
+            color: var(--text-secondary);
+            margin-top: 10px;
+        }
+        
+        .subtitle {
+            display: inline-block;
+            padding: 10px 24px;
+            border: 1px solid var(--border-color);
+            border-radius: 6px;
+            background: var(--bg-card);
+            margin-top: 20px;
+        }
+        
+        nav {
+            background: var(--bg-card);
+            padding: 25px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            position: static; /* make navigation static */
+            border: 1px solid var(--border-color);
+        }
+        
+        nav h3 {
+            font-family: 'Inter', sans-serif;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+            font-size: 1.1em;
+            font-weight: 600;
+        }
+        
+        nav ul {
+            list-style: none;
+        }
+        
+        nav ul li {
+            margin-bottom: 10px;
+            position: relative;
+            padding-left: 15px;
+        }
+        
+        nav ul li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--text-secondary);
+        }
+
+        /* Sub-tab styling */
+        nav ul.sub-tabs {
+            margin-left: 18px;
+            margin-top: 8px;
+        }
+        nav ul.sub-tabs li {
+            margin-bottom: 6px;
+            padding-left: 0;
+        }
+        nav ul.sub-tabs li::before {
+            content: '';
+        }
+        
+        nav ul li a {
+            text-decoration: none;
+            color: var(--text-primary);
+            font-weight: 400;
+            font-size: 1em;
+            transition: color 0.2s ease;
+        }
+        
+        nav ul li a:hover {
+            color: var(--text-primary);
+        }
+        
+        .content {
+            background: var(--bg-card);
+            border-radius: 8px;
+            padding: 50px;
+            margin-bottom: 30px;
+            border: 1px solid var(--border-color);
+        }
+        
+        .content::before {
+            display: none;
+        }
+        
+        @keyframes shine {
+            0% { transform: rotate(45deg) translateY(-100%); }
+            100% { transform: rotate(45deg) translateY(100%); }
+        }
+        
+        .section {
+            margin-bottom: 80px;
+            position: relative;
+        }
+        
+        h2 {
+            font-family: 'Inter', sans-serif;
+            color: var(--primary-color);
+            font-size: 2.2em;
+            font-weight: 600;
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid var(--border-color);
+        }
+        
+        h2::after,
+        h2::before {
+            display: none;
+        }
+        
+        h3 {
+            font-family: 'Inter', sans-serif;
+            color: var(--primary-color);
+            margin-top: 35px;
+            margin-bottom: 18px;
+            font-size: 1.5em;
+            font-weight: 600;
+        }
+        
+        h4 {
+            color: var(--text-primary);
+            margin-top: 25px;
+            margin-bottom: 12px;
+            font-size: 1.2em;
+            font-weight: 600;
+        }
+        
+        code {
+            background: var(--bg-dark);
+            padding: 3px 8px;
+            border-radius: 4px;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+            color: var(--text-primary);
+            border: 1px solid var(--border-color);
+            font-size: 0.9em;
+        }
+        
+        pre {
+            background: var(--bg-dark);
+            color: var(--text-primary);
+            padding: 25px;
+            border-radius: 6px;
+            overflow-x: auto;
+            margin: 20px 0;
+            border: 1px solid var(--border-color);
+        }
+        
+        pre::before {
+            display: none;
+        }
+        
+        pre code {
+            background: none;
+            color: inherit;
+            padding: 0;
+            border: none;
+            font-size: 0.9em;
+            line-height: 1.6;
+            font-family: 'JetBrains Mono', 'Courier New', monospace;
+        }
+        
+        .param-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 25px 0;
+            border-radius: 6px;
+            overflow: hidden;
+            border: 1px solid var(--border-color);
+        }
+        
+        .param-table th,
+        .param-table td {
+            padding: 15px;
+            text-align: left;
+            border-bottom: 1px solid var(--border-color);
+        }
+        
+        .param-table th {
+            background: var(--bg-dark);
+            color: var(--primary-color);
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            font-size: 0.9em;
+        }
+        
+        .param-table tr {
+            transition: background 0.2s ease;
+        }
+        
+        .param-table tbody tr:hover {
+            background: var(--bg-dark);
+        }
+        
+        .param-table tr:nth-child(even) {
+            background: var(--bg-card);
+        }
+        
+        .note {
+            background: var(--bg-dark);
+            border-left: 3px solid var(--secondary-color);
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 4px;
+        }
+        
+        .note::before {
+            display: none;
+        }
+        
+        .example {
+            background: var(--bg-dark);
+            border-left: 3px solid var(--primary-color);
+            padding: 20px;
+            margin: 25px 0;
+            border-radius: 4px;
+        }
+        
+        .example::before {
+            display: none;
+        }
+        
+        .control-type {
+            background: var(--bg-dark);
+            padding: 18px;
+            margin: 18px 0;
+            border-radius: 4px;
+            border-left: 3px solid var(--accent-color);
+            transition: border-color 0.2s ease;
+        }
+        
+        .control-type:hover {
+            border-left-color: var(--primary-color);
+        }
+        
+        .control-type::before {
+            display: none;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 40px 20px;
+            margin-top: 40px;
+            border-top: 1px solid var(--border-color);
+        }
+        
+        footer::before {
+            display: none;
+        }
+        
+        footer p {
+            font-family: 'Inter', sans-serif;
+            color: var(--text-secondary);
+            margin-top: 10px;
+            font-size: 0.95em;
+        }
+        
+        .tech-badge {
+            display: inline-block;
+            padding: 8px 18px;
+            margin: 5px;
+            background: var(--bg-dark);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 0.85em;
+            font-weight: 500;
+            transition: all 0.2s ease;
+        }
+        
+        .tech-badge:hover {
+            background: var(--bg-card);
+            border-color: var(--primary-color);
+        }
+        
+        ul {
+            list-style: none;
+        }
+        
+        .content ul li {
+            position: relative;
+            padding-left: 25px;
+            margin: 12px 0;
+        }
+        
+        .content ul li::before {
+            content: '•';
+            position: absolute;
+            left: 0;
+            color: var(--text-secondary);
+            font-size: 1em;
+        }
+        
+        .scroll-indicator {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 45px;
+            height: 45px;
+            background: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            z-index: 1000;
+        }
+        
+        .scroll-indicator:hover {
+            background: var(--bg-dark);
+            border-color: var(--primary-color);
+        }
+        
+        .scroll-indicator::before {
+            content: '↑';
+            color: var(--text-primary);
+            font-size: 1.3em;
+        }
+        
+        @media (max-width: 768px) {
+            header h1 {
+                font-size: 3em;
+            }
+            
+            .content {
+                padding: 30px;
+            }
+            
+            h2 {
+                font-size: 2em;
+            }
+        }
+        
+        .loading-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-color);
+            z-index: 9999;
+            animation: loadBar 1.5s ease-in-out forwards;
+        }
+        
+        @keyframes loadBar {
+            to { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+    <div class="loading-bar"></div>
+    <div class="grid-overlay"></div>
+    
+    <div class="container">
+        <header>
+            <h1>AXIS</h1>
+            <p class="subtitle">Autonomous eXecution and Integrated Systems for VEX V5</p>
+            <p style="font-size: 1em; color: var(--text-secondary); margin-top: 15px; line-height: 1.8;">Professional-grade robotics control library providing advanced driver input processing, precision odometry, and automated movement control for VEX V5 competitions.</p>
+        </header>
+        
+        <div class="content">
+            <nav>
+                <h3>// Navigation</h3>
+                <ul>
+                    <li><a href="#overview">System Overview</a>
+                        <ul class="sub-tabs">
+                            <li><a href="#overview-modules">Module Summary</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#drivercontrol">Driver Control Matrix</a>
+                        <ul class="sub-tabs">
+                            <li><a href="#drivercontrol-constructor">Constructor</a></li>
+                            <li><a href="#drivercontrol-params">Parameters</a></li>
+                            <li><a href="#drivercontrol-paradigms">Control Paradigms</a></li>
+                            <li><a href="#drivercontrol-methods">Core Methods</a></li>
+                            <li><a href="#drivercontrol-config">Configuration</a></li>
+                            <li><a href="#drivercontrol-example">Example</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#odometry">Odometry Tracker</a>
+                        <ul class="sub-tabs">
+                            <li><a href="#odometry-state">State Variables</a></li>
+                            <li><a href="#odometry-functions">Core Functions</a></li>
+                            <li><a href="#odometry-example">Example</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#pid">PID Controller</a>
+                        <ul class="sub-tabs">
+                            <li><a href="#pid-constructor">Constructor</a></li>
+                            <li><a href="#pid-gains">Gain Parameters</a></li>
+                            <li><a href="#pid-state">State Variables</a></li>
+                            <li><a href="#pid-methods">Core Methods</a></li>
+                            <li><a href="#pid-example-distance">Distance Example</a></li>
+                            <li><a href="#pid-example-angle">Angular Example</a></li>
+                        </ul>
+                    </li>
+                    <li><a href="#examples">Implementation Examples</a>
+                        <ul class="sub-tabs">
+                            <li><a href="#examples-system">Complete System Integration</a></li>
+                            <li><a href="#examples-point">Advanced Autonomous - Point Navigation</a></li>
+                        </ul>
+                    </li>
+                </ul>
+            </nav>
+            
+            <section id="overview" class="section">
+                <h2 data-text="System Overview">System Overview</h2>
+                <p style="font-size: 1.1em; line-height: 1.8; margin-bottom: 25px;">AXIS is a comprehensive robotics control library designed for VEX V5 competition systems. It provides three integrated modules that work together to deliver responsive driver control, accurate positioning, and precise automated movement.</p>
+                
+                <h3 style="margin-top: 30px; margin-bottom: 15px; font-size: 1.2em;">Core Features</h3>
+                <ul id="overview-modules" style="margin: 20px 0 30px 30px;">
+                    <li><strong>DriverControl:</strong> Responsive input processing with multiple control paradigms, customizable exponential curves, and joystick sensitivity calibration. Supports arcade, tank, split arcade, curvature, and single-stick modes.</li>
+                    <li><strong>OdometryTracker:</strong> Real-time position and orientation estimation using dual encoder feedback and IMU fusion. Maintains field-centric tracking with drift correction and supports both relative and absolute positioning modes.</li>
+                    <li><strong>PIDController:</strong> Industrial-grade proportional-integral-derivative controller with integral windup protection, configurable tolerance thresholds, and comprehensive tuning utilities. Ready for distance, heading, and multi-axis control applications.</li>
+                </ul>
+                
+                <h3 style="margin-top: 35px; margin-bottom: 15px; font-size: 1.1em;">Why AXIS</h3>
+                <ul style="margin: 15px 0 30px 30px;">
+                    <li>Production-ready code with extensive testing and optimization</li>
+                    <li>Flexible architecture supports multiple drivetrain configurations and control schemes</li>
+                    <li>Comprehensive documentation with practical implementation examples</li>
+                    <li>Performance-optimized for real-time competition environments</li>
+                    <li>Modular design allows independent use of any component</li>
+                </ul>
+            </section>
+            
+            <section id="drivercontrol" class="section">
+                <h2 data-text="DriverControl">Driver Control</h2>
+                <p style="font-size: 1.1em; margin-top: 20px; line-height: 1.8;">Advanced input processing system providing responsive and customizable driver control. Supports multiple control paradigms with configurable sensitivity curves, deadzone management, and precision mode activation.</p>
+                
+                <h3 id="drivercontrol-constructor">Initialization</h3>
+                <h4 style="margin-top: 15px; font-size: 1em; font-weight: 600; color: var(--text-secondary);">Constructor Signature</h4>
+                <pre><code>DriverControl(
+    ControlType type = ControlType::ARCADE,
+    int deadzoneThreshold = 10,
+    double inputExponent = 2.0,
+    int turnSens = 60,
+    int slowTurnSens = 50,
+    int axisDrive = 3,
+    int axisTurn = 1,
+    int axisLeft = 3,
+    int axisRight = 2
+)</code></pre>
+                
+                <h3 id="drivercontrol-params">Configuration Parameters</h3>
+                <p style="font-size: 0.95em; color: var(--text-secondary); margin: 10px 0 20px 0;">Customize DriverControl behavior through constructor parameters:</p>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Default</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>type</code></td>
+                            <td>ControlType</td>
+                            <td>ARCADE</td>
+                            <td>Control paradigm selector</td>
+                        </tr>
+                        <tr>
+                            <td><code>deadzoneThreshold</code></td>
+                            <td>int</td>
+                            <td>10</td>
+                            <td>Minimum activation threshold (0-100)</td>
+                        </tr>
+                        <tr>
+                            <td><code>inputExponent</code></td>
+                            <td>double</td>
+                            <td>2.0</td>
+                            <td>Neural curve exponent for precision</td>
+                        </tr>
+                        <tr>
+                            <td><code>turnSens</code></td>
+                            <td>int</td>
+                            <td>60</td>
+                            <td>Standard turn sensitivity (0-100%)</td>
+                        </tr>
+                        <tr>
+                            <td><code>slowTurnSens</code></td>
+                            <td>int</td>
+                            <td>50</td>
+                            <td>Precision turn sensitivity (0-100%)</td>
+                        </tr>
+                        <tr>
+                            <td><code>axisDrive</code></td>
+                            <td>int</td>
+                            <td>3</td>
+                            <td>Drive axis mapping (1-4)</td>
+                        </tr>
+                        <tr>
+                            <td><code>axisTurn</code></td>
+                            <td>int</td>
+                            <td>1</td>
+                            <td>Turn axis mapping (1-4)</td>
+                        </tr>
+                        <tr>
+                            <td><code>axisLeft</code></td>
+                            <td>int</td>
+                            <td>3</td>
+                            <td>Left motor axis (tank mode)</td>
+                        </tr>
+                        <tr>
+                            <td><code>axisRight</code></td>
+                            <td>int</td>
+                            <td>2</td>
+                            <td>Right motor axis (tank mode)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3 id="drivercontrol-paradigms">Control Modes</h3>
+                <p style="font-size: 0.95em; color: var(--text-secondary); margin: 10px 0 20px 0;">Select the control paradigm that best matches your drivetrain configuration:</p>
+                
+                <div class="control-type">
+                    <h4>ARCADE MODE</h4>
+                    <p><strong>Axis 3:</strong> Forward/Backward | <strong>Axis 1:</strong> Turn Left/Right</p>
+                    <p>Classic dual-stick arcade configuration - optimal for rapid directional changes.</p>
+                </div>
+                
+                <div class="control-type">
+                    <h4>TANK MODE</h4>
+                    <p><strong>Axis 3:</strong> Left Motors | <strong>Axis 2:</strong> Right Motors</p>
+                    <p>Independent side control - maximum precision for experienced operators.</p>
+                </div>
+                
+                <div class="control-type">
+                    <h4>SPLIT ARCADE</h4>
+                    <p><strong>Axis 3:</strong> Forward/Backward | <strong>Axis 4:</strong> Turn Left/Right</p>
+                    <p>Single-stick arcade variant with enhanced ergonomics.</p>
+                </div>
+                
+                <div class="control-type">
+                    <h4>CURVATURE DRIVE</h4>
+                    <p><strong>Axis 3:</strong> Forward/Backward | <strong>Axis 1:</strong> Velocity-Scaled Turn</p>
+                    <p>Neural-enhanced arcade with velocity-based turn scaling for fluid arc movements.</p>
+                </div>
+                
+                <div class="control-type">
+                    <h4>SINGLE STICK</h4>
+                    <p><strong>Axis 2:</strong> Forward/Backward | <strong>Axis 1:</strong> Turn Left/Right</p>
+                    <p>Right-stick only control for minimalist operation.</p>
+                </div>
+                
+                <h3 id="drivercontrol-methods">API Methods</h3>
+                
+                <h4>calculate()</h4>
+                <pre><code>void calculate(controller &Controller1, double &leftOutput, double &rightOutput, bool slowTurn = false)</code></pre>
+                <p>Processes neural input and generates motor power matrices.</p>
+                <ul style="margin-left: 30px;">
+                    <li><strong>Controller1:</strong> Primary controller interface</li>
+                    <li><strong>leftOutput:</strong> Left motor power output (-100 to 100)</li>
+                    <li><strong>rightOutput:</strong> Right motor power output (-100 to 100)</li>
+                    <li><strong>slowTurn:</strong> Precision mode activation flag</li>
+                </ul>
+                
+                <h4 id="drivercontrol-config" style="margin-top: 30px;">Runtime Configuration</h4>
+                <p style="font-size: 0.95em; color: var(--text-secondary); margin: 10px 0 15px 0;">Modify control parameters during runtime:</p>
+                <ul style="margin-left: 30px;">
+                    <li><code>setControlType(ControlType type)</code> - Paradigm switching</li>
+                    <li><code>setDeadzone(int value)</code> - Threshold calibration</li>
+                    <li><code>setExponent(double value)</code> - Curve adjustment</li>
+                    <li><code>setTurnSensitivity(int value)</code> - Turn sensitivity matrix</li>
+                    <li><code>setSlowTurnSensitivity(int value)</code> - Precision sensitivity</li>
+                    <li><code>setAxisDrive(int axis)</code> - Drive axis reconfiguration</li>
+                    <li><code>setAxisTurn(int axis)</code> - Turn axis reconfiguration</li>
+                </ul>
+                
+                <div class="example">
+                    <h4 id="drivercontrol-example" style="margin-top: 30px;">Quick Start Example</h4>
+                <p style="font-size: 0.95em; color: var(--text-secondary); margin: 10px 0 15px 0;">Basic driver control integration in your usercontrol loop:</p>
+                    <pre><code>// Initialize with arcade configuration
+DriverControl driver(ControlType::ARCADE, 10, 2.0, 60, 50);
+
+// Neural processing loop
+double leftPower, rightPower;
+driver.calculate(Controller1, leftPower, rightPower);
+
+leftMotor.spin(forward, leftPower, percent);
+rightMotor.spin(forward, rightPower, percent);</code></pre>
+                </div>
+            </section>
+            
+            <section id="odometry" class="section">
+                <h2 data-text="OdometryTracker">Odometry Tracking</h2>
+                <p style="font-size: 1.1em; margin-top: 20px; line-height: 1.8;">High-precision spatial tracking system that maintains continuous position and heading estimation using dual encoder feedback fused with inertial measurement. Provides accurate field-centric navigation with configurable tracking parameters.</p>
+                
+                <h3 id="odometry-state">State Properties</h3>
+                <p style="font-size: 0.95em; color: var(--text-secondary); margin: 10px 0 20px 0;">OdometryTracker maintains the following state properties:</p>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>Variable</th>
+                            <th>Type</th>
+                            <th>Default</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>x</code></td>
+                            <td>double</td>
+                            <td>0.0</td>
+                            <td>X-axis position (inches)</td>
+                        </tr>
+                        <tr>
+                            <td><code>y</code></td>
+                            <td>double</td>
+                            <td>0.0</td>
+                            <td>Y-axis position (inches)</td>
+                        </tr>
+                        <tr>
+                            <td><code>heading</code></td>
+                            <td>double</td>
+                            <td>0.0</td>
+                            <td>Rotational heading (degrees)</td>
+                        </tr>
+                        <tr>
+                            <td><code>wheelBase</code></td>
+                            <td>double</td>
+                            <td>10</td>
+                            <td>Inter-wheel distance (inches)</td>
+                        </tr>
+                        <tr>
+                            <td><code>trackingWheelRadius</code></td>
+                            <td>double</td>
+                            <td>3.25</td>
+                            <td>Encoder wheel radius (inches)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3 id="odometry-functions">API Methods</h3>
+                
+                <h4>update()</h4>
+                <pre><code>void update(double leftDist, double rightDist, double imuHeading)</code></pre>
+                <p>Updates spatial coordinates via encoder fusion.</p>
+                <ul style="margin-left: 30px;">
+                    <li><strong>leftDist:</strong> Left encoder displacement (inches)</li>
+                    <li><strong>rightDist:</strong> Right encoder displacement (inches)</li>
+                    <li><strong>imuHeading:</strong> IMU heading feedback (degrees)</li>
+                </ul>
+                
+                <h4>reset()</h4>
+                <pre><code>void reset()</code></pre>
+                <p>Resets position matrix to origin (0, 0, 0°).</p>
+                
+                <h4>setPosition()</h4>
+                <pre><code>void setPosition(double newX, double newY, double newHeading)</code></pre>
+                <p>Manual coordinate override for field calibration.</p>
+                
+                <h4>distanceTo()</h4>
+                <pre><code>double distanceTo(double targetX, double targetY)</code></pre>
+                <p>Calculates Euclidean distance to target coordinates.</p>
+                
+                <h4>headingTo()</h4>
+                <pre><code>double headingTo(double targetX, double targetY)</code></pre>
+                <p>Computes optimal heading vector to target (degrees).</p>
+                
+                <div class="example">
+                    <h4 id="odometry-example" style="margin-top: 25px;">Integration Example</h4>
+                <p style="font-size: 0.95em; color: var(--text-secondary); margin: 10px 0 15px 0;">Typical odometry update cycle in your autonomous routine:</p>
+                    <pre><code>OdometryTracker odometry;
+
+// Initialize coordinate system
+odometry.setPosition(0, 0, 0);
+
+// Continuous tracking loop
+double leftDist = leftEncoder.position(inches);
+double rightDist = rightEncoder.position(inches);
+double heading = imu.heading();
+
+odometry.update(leftDist, rightDist, heading);
+
+// Target acquisition
+double distance = odometry.distanceTo(24, 24);
+double targetHeading = odometry.headingTo(24, 24);</code></pre>
+                </div>
+            </section>
+            
+            <section id="pid" class="section">
+                <h2 data-text="PIDController">PID Control System</h2>
+                <p style="font-size: 1.1em; margin-top: 20px; line-height: 1.8;">Production-grade proportional-integral-derivative controller optimized for VEX V5 robotics. Features integral windup protection, configurable convergence detection, and extensive tuning support for distance control, rotational control, and multi-axis operations.</p>
+                
+                <h3 id="pid-constructor">Initialization</h3>
+                <h4 style="margin-top: 15px; font-size: 1em; font-weight: 600; color: var(--text-secondary);">Constructor Signature</h4>
+                <pre><code>PIDController(double p, double i, double d)</code></pre>
+                
+                <h3 id="pid-gains">Gain Coefficients</h3>
+                <p style="font-size: 0.95em; color: var(--text-secondary); margin: 10px 0 20px 0;">Configure PID behavior through gain coefficients passed to the constructor:</p>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>p</code></td>
+                            <td>double</td>
+                            <td>Proportional gain coefficient (kP)</td>
+                        </tr>
+                        <tr>
+                            <td><code>i</code></td>
+                            <td>double</td>
+                            <td>Integral gain coefficient (kI)</td>
+                        </tr>
+                        <tr>
+                            <td><code>d</code></td>
+                            <td>double</td>
+                            <td>Derivative gain coefficient (kD)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3 id="pid-state">Runtime Properties</h3>
+                <p style="font-size: 0.95em; color: var(--text-secondary); margin: 10px 0 20px 0;">Adjust these properties at runtime to fine-tune controller behavior:</p>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>Variable</th>
+                            <th>Type</th>
+                            <th>Default</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>maxIntegral</code></td>
+                            <td>double</td>
+                            <td>50.0</td>
+                            <td>Maximum integral accumulation cap</td>
+                        </tr>
+                        <tr>
+                            <td><code>tolerance</code></td>
+                            <td>double</td>
+                            <td>1.0</td>
+                            <td>Target convergence threshold</td>
+                        </tr>
+                        <tr>
+                            <td><code>lastP</code></td>
+                            <td>double</td>
+                            <td>0.0</td>
+                            <td>Previous proportional component</td>
+                        </tr>
+                        <tr>
+                            <td><code>lastI</code></td>
+                            <td>double</td>
+                            <td>0.0</td>
+                            <td>Previous integral component</td>
+                        </tr>
+                        <tr>
+                            <td><code>lastD</code></td>
+                            <td>double</td>
+                            <td>0.0</td>
+                            <td>Previous derivative component</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3 id="pid-methods">API Methods</h3>
+                
+                <h4>calculate()</h4>
+                <pre><code>double calculate(double error, double dt)</code></pre>
+                <p>Computes PID control output based on error feedback.</p>
+                <ul style="margin-left: 30px;">
+                    <li><strong>error:</strong> Current error value (target - actual)</li>
+                    <li><strong>dt:</strong> Time delta from previous calculation (seconds)</li>
+                    <li><strong>Returns:</strong> Control signal output</li>
+                </ul>
+                
+                <h4>reset()</h4>
+                <pre><code>void reset()</code></pre>
+                <p>Clears integral accumulation and error history.</p>
+                
+                <h4>atTarget()</h4>
+                <pre><code>bool atTarget(double error)</code></pre>
+                <p>Convergence detection within tolerance bounds.</p>
+                
+                <div class="note">
+                    <strong>Tuning Guidelines</strong>
+                    <p style="margin-top: 12px; font-size: 0.95em; line-height: 1.6;">Follow this systematic process to achieve optimal controller performance:</p>
+                    <ul style="margin-left: 30px; margin-top: 12px;">
+                        <li><strong>Step 1 (kP):</strong> Start with 0.5 and gradually increase until the system oscillates. Back off to 70% of that value.</li>
+                        <li><strong>Step 2 (kD):</strong> Increase from 0.1 until oscillation is eliminated. This parameter damps overshoot.</li>
+                        <li><strong>Step 3 (kI):</strong> Increase from 0.01 until steady-state error is eliminated. Use sparingly to avoid instability.</li>
+                        <li><strong>Validation:</strong> Test at various setpoints to confirm stability across the operating range.</li>
+                    </ul>
+                </div>
+                
+                <div class="example">
+                    <h4 id="pid-example-distance" style="margin-top: 25px;">Distance Control Example</h4>
+                <p style="font-size: 0.95em; color: var(--text-secondary); margin: 10px 0 15px 0;">Autonomous drive-to-distance routine using PID control:</p>
+                    <pre><code>PIDController drivePID(1.0, 0.0, 0.1);
+drivePID.tolerance = 0.5;  // 0.5 inch precision
+
+double target = 24.0;  // 24 inch displacement
+double lastTime = Brain.timer(msec);
+
+while (!drivePID.atTarget(error)) {
+    double current = leftEncoder.position(inches);
+    double error = target - current;
+    
+    double currentTime = Brain.timer(msec);
+    double dt = (currentTime - lastTime) / 1000.0;
+    lastTime = currentTime;
+    
+    double power = drivePID.calculate(error, dt);
+    
+    leftMotor.spin(forward, power, percent);
+    rightMotor.spin(forward, power, percent);
+    
+    wait(20, msec);
+}</code></pre>
+                </div>
+                
+                <div class="example">
+                    <h4 id="pid-example-angle" style="margin-top: 25px;">Heading Control Example</h4>
+                <p style="font-size: 0.95em; color: var(--text-secondary); margin: 10px 0 15px 0;">Autonomous turn-to-angle routine with heading correction:</p>
+                    <pre><code>PIDController turnPID(1.5, 0.0, 0.2);
+turnPID.tolerance = 2.0;  // 2 degree precision
+
+double targetAngle = 90.0;  // 90 degree rotation
+double lastTime = Brain.timer(msec);
+
+while (!turnPID.atTarget(error)) {
+    double currentAngle = imu.heading();
+    double error = targetAngle - currentAngle;
+    
+    // Angular wraparound correction
+    if (error > 180) error -= 360;
+    if (error < -180) error += 360;
+    
+    double currentTime = Brain.timer(msec);
+    double dt = (currentTime - lastTime) / 1000.0;
+    lastTime = currentTime;
+    
+    double power = turnPID.calculate(error, dt);
+    
+    leftMotor.spin(forward, power, percent);
+    rightMotor.spin(reverse, power, percent);
+    
+    wait(20, msec);
+}</code></pre>
+                </div>
+            </section>
+            
+            <section id="examples" class="section">
+                <h2 data-text="Examples">Implementation Examples</h2>
+                <p style="font-size: 1.1em; margin-top: 20px; margin-bottom: 30px; line-height: 1.8;">Production-ready code examples demonstrating complete system integration, driver control loops, and autonomous navigation. These examples serve as templates for competition deployment.</p>
+                <p style="font-size: 1.1em; margin-top: 20px; margin-bottom: 30px; line-height: 1.8;">Production-ready code examples demonstrating complete system integration, driver control loops, and autonomous navigation. These examples serve as templates for competition deployment.</p>
+                
+                <h3 id="examples-system">Complete System Integration</h3>
+                <p style="font-size: 0.95em; color: var(--text-secondary); margin: 10px 0 20px 0;">Full project setup demonstrating all three modules working together:</p>
+                <pre><code>#include "vex.h"
+#include "DriverControl.h"
+#include "OdometryTracker.h"
+#include "PIDController.h"
+
+using namespace vex;
+
+competition Competition;
+
+// Hardware configuration
+controller Controller1 = controller(primary);
+motor leftFront = motor(PORT1);
+motor leftBack = motor(PORT2);
+motor rightFront = motor(PORT3);
+motor rightBack = motor(PORT4);
+inertial imu = inertial(PORT10);
+
+// Neural module instances
+DriverControl driverControl(ControlType::ARCADE, 10, 2.0, 60, 50);
+OdometryTracker odometry;
+PIDController drivePID(1.0, 0.0, 0.1);
+PIDController turnPID(1.5, 0.0, 0.2);
+
+void pre_auton(void) {
+  // Motor configuration
+  leftFront.setBrake(brake);
+  leftBack.setBrake(brake);
+  rightFront.setBrake(brake);
+  rightBack.setBrake(brake);
+  
+  // IMU calibration sequence
+  imu.calibrate();
+  waitUntil(!imu.isCalibrating());
+  
+  // Odometry initialization
+  odometry.reset();
+}
+
+void autonomous(void) {
+  // Autonomous control matrix
+}
+
+void usercontrol(void) {
+  while (true) {
+    double leftPower, rightPower;
+    driverControl.calculate(Controller1, leftPower, rightPower);
+    
+    leftFront.spin(forward, leftPower, percent);
+    leftBack.spin(forward, leftPower, percent);
+    rightFront.spin(forward, rightPower, percent);
+    rightBack.spin(forward, rightPower, percent);
+    
+    wait(20, msec);
+  }
+}
+
+int main() {
+  Competition.autonomous(autonomous);
+  Competition.drivercontrol(usercontrol);
+  
+  pre_auton();
+  
+  while (true) {
+    wait(100, msec);
+  }
+}</code></pre>
+                
+                <h3 id="examples-point">Advanced: Autonomous Navigation</h3>
+                <p style="font-size: 0.95em; color: var(--text-secondary); margin: 10px 0 20px 0;">Field-centric navigation combining odometry tracking with dual PID controllers for simultaneous distance and heading control:</p>
+                <pre><code>void driveToPoint(double targetX, double targetY) {
+    PIDController distPID(1.0, 0.0, 0.1);
+    PIDController headingPID(1.5, 0.0, 0.2);
+    
+    distPID.tolerance = 1.0;
+    headingPID.tolerance = 2.0;
+    
+    double lastTime = Brain.timer(msec);
+    
+    while (true) {
+        // Odometry update cycle
+        double leftDist = (leftFront.position(degrees) + leftBack.position(degrees)) / 2.0;
+        double rightDist = (rightFront.position(degrees) + rightBack.position(degrees)) / 2.0;
+        odometry.update(leftDist * 0.0872665, rightDist * 0.0872665, imu.heading());
+        
+        // Error calculation
+        double distError = odometry.distanceTo(targetX, targetY);
+        double targetHeading = odometry.headingTo(targetX, targetY);
+        double headingError = targetHeading - odometry.heading;
+        
+        // Angular wraparound normalization
+        if (headingError > 180) headingError -= 360;
+        if (headingError < -180) headingError += 360;
+        
+        // Convergence detection
+        if (distPID.atTarget(distError) && headingPID.atTarget(headingError)) {
+            break;
+        }
+        
+        // Time delta computation
+        double currentTime = Brain.timer(msec);
+        double dt = (currentTime - lastTime) / 1000.0;
+        lastTime = currentTime;
+        
+        // PID control signals
+        double distPower = distPID.calculate(distError, dt);
+        double turnPower = headingPID.calculate(headingError, dt);
+        
+        // Differential drive matrix
+        double leftPower = distPower + turnPower;
+        double rightPower = distPower - turnPower;
+        
+        leftFront.spin(forward, leftPower, percent);
+        leftBack.spin(forward, leftPower, percent);
+        rightFront.spin(forward, rightPower, percent);
+        rightBack.spin(forward, rightPower, percent);
+        
+        wait(20, msec);
+    }
+    
+    // Termination sequence
+    leftFront.stop();
+    leftBack.stop();
+    rightFront.stop();
+    rightBack.stop();
+}</code></pre>
+            </section>
+        </div>
+        <footer>
+            <p>AXIS Documentation | VEX V5 Robotics</p>
+        </footer>
+    
+    <div class="scroll-indicator" onclick="window.scrollTo({top: 0, behavior: 'smooth'})"></div>
+    
+    <script>
+        // Smooth scroll for navigation
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                document.querySelector(this.getAttribute('href')).scrollIntoView({
+                    behavior: 'smooth'
+                });
+            });
+        });
+        
+        // Add data-text attribute for glow effect
+        document.querySelectorAll('h2').forEach(h2 => {
+            h2.setAttribute('data-text', h2.textContent);
+        });
+    </script>
+</body>
+</html>
+    <!-- Removed duplicate, colorized secondary HTML/CSS block to enforce grayscale theme -->
+                        </tr>
+                        <tr>
+                            <td><code>axisTurn</code></td>
+                            <td>int</td>
+                            <td>1</td>
+                            <td>Controller axis for turn (1-4)</td>
+                        </tr>
+                        <tr>
+                            <td><code>axisLeft</code></td>
+                            <td>int</td>
+                            <td>3</td>
+                            <td>Controller axis for left side (tank mode)</td>
+                        </tr>
+                        <tr>
+                            <td><code>axisRight</code></td>
+                            <td>int</td>
+                            <td>2</td>
+                            <td>Controller axis for right side (tank mode)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3>Control Types</h3>
+                
+                <div class="control-type">
+                    <h4>ARCADE</h4>
+                    <p><strong>Axis 3:</strong> Forward/Backward | <strong>Axis 1:</strong> Turn Left/Right</p>
+                    <p>Classic arcade drive - one stick for direction, one for turning.</p>
+                </div>
+                
+                <div class="control-type">
+                    <h4>TANK</h4>
+                    <p><strong>Axis 3:</strong> Left Side | <strong>Axis 2:</strong> Right Side</p>
+                    <p>Traditional tank controls - each stick controls one side independently.</p>
+                </div>
+                
+                <div class="control-type">
+                    <h4>SPLIT_ARCADE</h4>
+                    <p><strong>Axis 3:</strong> Forward/Backward | <strong>Axis 4:</strong> Turn Left/Right</p>
+                    <p>Arcade mode using left stick only.</p>
+                </div>
+                
+                <div class="control-type">
+                    <h4>CURVATURE</h4>
+                    <p><strong>Axis 3:</strong> Forward/Backward | <strong>Axis 1:</strong> Turn (velocity-scaled)</p>
+                    <p>Advanced arcade with turn scaling based on forward velocity for smoother arcs.</p>
+                </div>
+                
+                <div class="control-type">
+                    <h4>SINGLE_STICK</h4>
+                    <p><strong>Axis 2:</strong> Forward/Backward | <strong>Axis 1:</strong> Turn Left/Right</p>
+                    <p>Right stick only control scheme.</p>
+                </div>
+                
+                <h3>Key Methods</h3>
+                
+                <h4>calculate()</h4>
+                <pre><code>void calculate(controller &Controller1, double &leftOutput, double &rightOutput, bool slowTurn = false)</code></pre>
+                <p>Calculates motor power values based on controller input.</p>
+                <ul style="margin-left: 30px;">
+                    <li><strong>Controller1:</strong> VEX controller reference</li>
+                    <li><strong>leftOutput:</strong> Output variable for left motor power (-100 to 100)</li>
+                    <li><strong>rightOutput:</strong> Output variable for right motor power (-100 to 100)</li>
+                    <li><strong>slowTurn:</strong> Enable slow turn mode (optional)</li>
+                </ul>
+                
+                <h4>Setter Methods</h4>
+                <ul style="margin-left: 30px;">
+                    <li><code>setControlType(ControlType type)</code> - Change control scheme</li>
+                    <li><code>setDeadzone(int value)</code> - Adjust deadzone threshold</li>
+                    <li><code>setExponent(double value)</code> - Change input curve</li>
+                    <li><code>setTurnSensitivity(int value)</code> - Adjust turn sensitivity</li>
+                    <li><code>setSlowTurnSensitivity(int value)</code> - Adjust slow turn sensitivity</li>
+                    <li><code>setAxisDrive(int axis)</code> - Configure drive axis</li>
+                    <li><code>setAxisTurn(int axis)</code> - Configure turn axis</li>
+                </ul>
+                
+                <div class="example">
+                    <h4>Example Usage</h4>
+                    <pre><code>// Create instance with arcade controls
+DriverControl driver(ControlType::ARCADE, 10, 2.0, 60, 50);
+
+// In usercontrol loop:
+double leftPower, rightPower;
+driver.calculate(Controller1, leftPower, rightPower);
+
+leftMotor.spin(forward, leftPower, percent);
+rightMotor.spin(forward, rightPower, percent);</code></pre>
+                </div>
+            </section>
+            
+            <section id="odometry" class="section">
+                <h2>OdometryTracker</h2>
+                <p>Real-time robot position tracking using wheel encoders and IMU heading.</p>
+                
+                <h3>Properties</h3>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Type</th>
+                            <th>Default</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>x</code></td>
+                            <td>double</td>
+                            <td>0.0</td>
+                            <td>X position in inches</td>
+                        </tr>
+                        <tr>
+                            <td><code>y</code></td>
+                            <td>double</td>
+                            <td>0.0</td>
+                            <td>Y position in inches</td>
+                        </tr>
+                        <tr>
+                            <td><code>heading</code></td>
+                            <td>double</td>
+                            <td>0.0</td>
+                            <td>Robot heading in degrees</td>
+                        </tr>
+                        <tr>
+                            <td><code>wheelBase</code></td>
+                            <td>double</td>
+                            <td>10</td>
+                            <td>Distance between wheels (inches)</td>
+                        </tr>
+                        <tr>
+                            <td><code>trackingWheelRadius</code></td>
+                            <td>double</td>
+                            <td>3.25</td>
+                            <td>Tracking wheel radius (inches)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3>Methods</h3>
+                
+                <h4>update()</h4>
+                <pre><code>void update(double leftDist, double rightDist, double imuHeading)</code></pre>
+                <p>Updates robot position based on wheel movement and IMU heading.</p>
+                <ul style="margin-left: 30px;">
+                    <li><strong>leftDist:</strong> Distance traveled by left wheels (inches)</li>
+                    <li><strong>rightDist:</strong> Distance traveled by right wheels (inches)</li>
+                    <li><strong>imuHeading:</strong> Current IMU heading (degrees)</li>
+                </ul>
+                
+                <h4>reset()</h4>
+                <pre><code>void reset()</code></pre>
+                <p>Resets position to (0, 0) and heading to 0°.</p>
+                
+                <h4>setPosition()</h4>
+                <pre><code>void setPosition(double newX, double newY, double newHeading)</code></pre>
+                <p>Manually set robot position and heading.</p>
+                
+                <h4>distanceTo()</h4>
+                <pre><code>double distanceTo(double targetX, double targetY)</code></pre>
+                <p>Calculates straight-line distance to target coordinates.</p>
+                
+                <h4>headingTo()</h4>
+                <pre><code>double headingTo(double targetX, double targetY)</code></pre>
+                <p>Calculates heading angle to target coordinates (degrees).</p>
+                
+                <div class="example">
+                    <h4>Example Usage</h4>
+                    <pre><code>OdometryTracker odometry;
+
+// Set initial position
+odometry.setPosition(0, 0, 0);
+
+// In autonomous loop:
+double leftDist = leftEncoder.position(inches);
+double rightDist = rightEncoder.position(inches);
+double heading = imu.heading();
+
+odometry.update(leftDist, rightDist, heading);
+
+// Navigate to target
+double distance = odometry.distanceTo(24, 24);
+double targetHeading = odometry.headingTo(24, 24);</code></pre>
+                </div>
+            </section>
+            
+            <section id="pid" class="section">
+                <h2>PIDController</h2>
+                <p>Proportional-Integral-Derivative controller for precise automated movements.</p>
+                
+                <h3>Constructor</h3>
+                <pre><code>PIDController(double p, double i, double d)</code></pre>
+                
+                <h3>Parameters</h3>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>Parameter</th>
+                            <th>Type</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>p</code></td>
+                            <td>double</td>
+                            <td>Proportional gain (kP)</td>
+                        </tr>
+                        <tr>
+                            <td><code>i</code></td>
+                            <td>double</td>
+                            <td>Integral gain (kI)</td>
+                        </tr>
+                        <tr>
+                            <td><code>d</code></td>
+                            <td>double</td>
+                            <td>Derivative gain (kD)</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3>Properties</h3>
+                <table class="param-table">
+                    <thead>
+                        <tr>
+                            <th>Property</th>
+                            <th>Type</th>
+                            <th>Default</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>maxIntegral</code></td>
+                            <td>double</td>
+                            <td>50.0</td>
+                            <td>Maximum integral accumulation</td>
+                        </tr>
+                        <tr>
+                            <td><code>tolerance</code></td>
+                            <td>double</td>
+                            <td>1.0</td>
+                            <td>Error tolerance for atTarget()</td>
+                        </tr>
+                        <tr>
+                            <td><code>lastP</code></td>
+                            <td>double</td>
+                            <td>0.0</td>
+                            <td>Last proportional component</td>
+                        </tr>
+                        <tr>
+                            <td><code>lastI</code></td>
+                            <td>double</td>
+                            <td>0.0</td>
+                            <td>Last integral component</td>
+                        </tr>
+                        <tr>
+                            <td><code>lastD</code></td>
+                            <td>double</td>
+                            <td>0.0</td>
+                            <td>Last derivative component</td>
+                        </tr>
+                    </tbody>
+                </table>
+                
+                <h3>Methods</h3>
+                
+                <h4>calculate()</h4>
+                <pre><code>double calculate(double error, double dt)</code></pre>
+                <p>Calculates PID output based on current error.</p>
+                <ul style="margin-left: 30px;">
+                    <li><strong>error:</strong> Current error value (target - current)</li>
+                    <li><strong>dt:</strong> Time delta since last calculation (seconds)</li>
+                    <li><strong>Returns:</strong> Control output value</li>
+                </ul>
+                
+                <h4>reset()</h4>
+                <pre><code>void reset()</code></pre>
+                <p>Resets integral accumulation and previous error.</p>
+                
+                <h4>atTarget()</h4>
+                <pre><code>bool atTarget(double error)</code></pre>
+                <p>Checks if error is within tolerance.</p>
+                
+                <div class="note">
+                    <strong>PID Tuning Tips:</strong>
+                    <ul style="margin-left: 30px; margin-top: 10px;">
+                        <li><strong>kP:</strong> Start with small value (0.5-2.0). Increase until oscillation occurs.</li>
+                        <li><strong>kI:</strong> Usually very small (0.0-0.1). Helps eliminate steady-state error.</li>
+                        <li><strong>kD:</strong> Reduces oscillation. Start small (0.1-0.5).</li>
+                        <li>Tune one gain at a time: P first, then D, then I.</li>
+                    </ul>
+                </div>
+                
+                <div class="example">
+                    <h4>Example Usage - Drive to Distance</h4>
+                    <pre><code>PIDController drivePID(1.0, 0.0, 0.1);
+drivePID.tolerance = 0.5;  // 0.5 inch tolerance
+
+double target = 24.0;  // Drive 24 inches
+double lastTime = Brain.timer(msec);
+
+while (!drivePID.atTarget(error)) {
+    double current = leftEncoder.position(inches);
+    double error = target - current;
+    
+    double currentTime = Brain.timer(msec);
+    double dt = (currentTime - lastTime) / 1000.0;
+    lastTime = currentTime;
+    
+    double power = drivePID.calculate(error, dt);
+    
+    leftMotor.spin(forward, power, percent);
+    rightMotor.spin(forward, power, percent);
+    
+    wait(20, msec);
+}</code></pre>
+                </div>
+                
+                <div class="example">
+                    <h4>Example Usage - Turn to Angle</h4>
+                    <pre><code>PIDController turnPID(1.5, 0.0, 0.2);
+turnPID.tolerance = 2.0;  // 2 degree tolerance
+
+double targetAngle = 90.0;  // Turn 90 degrees
+double lastTime = Brain.timer(msec);
+
+while (!turnPID.atTarget(error)) {
+    double currentAngle = imu.heading();
+    double error = targetAngle - currentAngle;
+    
+    // Handle angle wraparound
+    if (error > 180) error -= 360;
+    if (error < -180) error += 360;
+    
+    double currentTime = Brain.timer(msec);
+    double dt = (currentTime - lastTime) / 1000.0;
+    lastTime = currentTime;
+    
+    double power = turnPID.calculate(error, dt);
+    
+    leftMotor.spin(forward, power, percent);
+    rightMotor.spin(reverse, power, percent);
+    
+    wait(20, msec);
+}</code></pre>
+                </div>
+            </section>
+            
+            <section id="examples" class="section">
+                <h2>Complete Usage Examples</h2>
+                
+                <h3>Complete main.cpp Setup</h3>
+                <pre><code>#include "vex.h"
+#include "DriverControl.h"
+#include "OdometryTracker.h"
+#include "PIDController.h"
+
+using namespace vex;
+
+competition Competition;
+
+// Device declarations
+controller Controller1 = controller(primary);
+motor leftFront = motor(PORT1);
+motor leftBack = motor(PORT2);
+motor rightFront = motor(PORT3);
+motor rightBack = motor(PORT4);
+inertial imu = inertial(PORT10);
+
+// Custom class instances
+DriverControl driverControl(ControlType::ARCADE, 10, 2.0, 60, 50);
+OdometryTracker odometry;
+PIDController drivePID(1.0, 0.0, 0.1);
+PIDController turnPID(1.5, 0.0, 0.2);
+
+void pre_auton(void) {
+  leftFront.setBrake(brake);
+  leftBack.setBrake(brake);
+  rightFront.setBrake(brake);
+  rightBack.setBrake(brake);
+  
+  imu.calibrate();
+  waitUntil(!imu.isCalibrating());
+  
+  odometry.reset();
+}
+
+void autonomous(void) {
+  // Your autonomous code here
+}
+
+void usercontrol(void) {
+  while (true) {
+    double leftPower, rightPower;
+    driverControl.calculate(Controller1, leftPower, rightPower);
+    
+    leftFront.spin(forward, leftPower, percent);
+    leftBack.spin(forward, leftPower, percent);
+    rightFront.spin(forward, rightPower, percent);
+    rightBack.spin(forward, rightPower, percent);
+    
+    wait(20, msec);
+  }
+}
+
+int main() {
+  Competition.autonomous(autonomous);
+  Competition.drivercontrol(usercontrol);
+  
+  pre_auton();
+  
+  while (true) {
+    wait(100, msec);
+  }
+}</code></pre>
+                
+                <h3>Advanced Autonomous - Drive to Point</h3>
+                <pre><code>void driveToPoint(double targetX, double targetY) {
+    PIDController distPID(1.0, 0.0, 0.1);
+    PIDController headingPID(1.5, 0.0, 0.2);
+    
+    distPID.tolerance = 1.0;
+    headingPID.tolerance = 2.0;
+    
+    double lastTime = Brain.timer(msec);
+    
+    while (true) {
+        // Update odometry
+        double leftDist = (leftFront.position(degrees) + leftBack.position(degrees)) / 2.0;
+        double rightDist = (rightFront.position(degrees) + rightBack.position(degrees)) / 2.0;
+        odometry.update(leftDist * 0.0872665, rightDist * 0.0872665, imu.heading());
+        
+        // Calculate errors
+        double distError = odometry.distanceTo(targetX, targetY);
+        double targetHeading = odometry.headingTo(targetX, targetY);
+        double headingError = targetHeading - odometry.heading;
+        
+        // Handle angle wraparound
+        if (headingError > 180) headingError -= 360;
+        if (headingError < -180) headingError += 360;
+        
+        // Check if at target
+        if (distPID.atTarget(distError) && headingPID.atTarget(headingError)) {
+            break;
+        }
+        
+        // Calculate dt
+        double currentTime = Brain.timer(msec);
+        double dt = (currentTime - lastTime) / 1000.0;
+        lastTime = currentTime;
+        
+        // Calculate PID outputs
+        double distPower = distPID.calculate(distError, dt);
+        double turnPower = headingPID.calculate(headingError, dt);
+        
+        // Apply to motors
+        double leftPower = distPower + turnPower;
+        double rightPower = distPower - turnPower;
+        
+        leftFront.spin(forward, leftPower, percent);
+        leftBack.spin(forward, leftPower, percent);
+        rightFront.spin(forward, rightPower, percent);
+        rightBack.spin(forward, rightPower, percent);
+        
+        wait(20, msec);
+    }
+    
+    // Stop motors
+    leftFront.stop();
+    leftBack.stop();
+    rightFront.stop();
+    rightBack.stop();
+}</code></pre>
+            </section>
+        </div>
+        
+        <footer>
+            <p style="font-weight: 600; margin-bottom: 8px;">AXIS Control Library</p>
+            <p style="font-size: 0.9em; opacity: 0.8;">Professional robotics control for VEX V5 competition systems</p>
+        </footer>
+    </div>
+</body>
+</html>
